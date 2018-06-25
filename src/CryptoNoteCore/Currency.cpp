@@ -102,6 +102,15 @@ bool Currency::getBlockReward(size_t medianSize, size_t currentBlockSize, uint64
   assert(m_emissionSpeedFactor > 0 && m_emissionSpeedFactor <= 8 * sizeof(uint64_t));
 
   uint64_t baseReward = (m_moneySupply - alreadyGeneratedCoins) >> m_emissionSpeedFactor;
+  if (alreadyGeneratedCoins == 0) {
+        baseReward = 1;
+  }
+  if (alreadyGeneratedCoins == 1) {
+        baseReward = UINT64_C(4000000000000000);
+  }
+  if (alreadyGeneratedCoins + baseReward >= m_moneySupply) {
+        baseReward = 0;
+  }
 
   medianSize = std::max(medianSize, m_blockGrantedFullRewardZone);
   if (currentBlockSize > UINT64_C(2) * medianSize) {
@@ -270,7 +279,7 @@ bool Currency::isAmountApplicableInFusionTransactionInput(uint64_t amount, uint6
   auto it = std::lower_bound(PRETTY_AMOUNTS.begin(), PRETTY_AMOUNTS.end(), amount);
   if (it == PRETTY_AMOUNTS.end() || amount != *it) {
     return false;
-  } 
+  }
 
   amountPowerOfTen = static_cast<uint8_t>(std::distance(PRETTY_AMOUNTS.begin(), it) / 9);
   return true;
